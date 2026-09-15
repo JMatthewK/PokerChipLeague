@@ -1,10 +1,8 @@
-from flask import Flask, redirect, url_for, session
-from authlib.integrations.flask_client import OAuth
-import os
+# Contains the OAuth registration and JWT validation
 
-app = Flask(__name__)
-app.secret_key = os.urandom(24)  # Use a secure random key in production
-oauth = OAuth(app)
+from authlib.integrations.starlette_client import OAuth
+
+oauth = OAuth()
 
 oauth.register(
   name='oidc',
