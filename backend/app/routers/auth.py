@@ -1,5 +1,9 @@
 from fastapi import APIRouter, Request
 from auth import oauth
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # Load environment variables from .env file
 
 # This router will handle authentication-related endpoints
 router = APIRouter(
@@ -40,12 +44,14 @@ async def auth_callback(request: Request):
     print("Callback received, processing authentication...")
     
     token = await oauth.cognito.authorize_access_token(request)
-    print("Token received:")
-    print(token)
-    
-    user_info = await oauth.cognito.parse_id_token(request, token)
-    print("User info retrieved:")
-    print(user_info)
+    user_info = token["userinfo"]
+    request.session["user_info"] = {
+        "sub": user_info["sub"],
+        "email": user_info["email"],
+        "username": user_info.get("cognito:username")
+    }
+    print("Session: ")
+    print(request.session)
 
     # Here you would typically create a session or JWT for the user
     return {
@@ -54,15 +60,33 @@ async def auth_callback(request: Request):
         }
     
 @router.get("/logout")
-async def logout():
-    return {"message": "Logout endpoint"}
+async def logout(request: Request):
+    """Endpoint to logout user and end session data
+
+    Args:
+        request (Request): Request object contains information about the request and is used to access the request context, which is necessary for OAuth2 flow.
+
+    Returns:
+        _type_: Message indicating that the user has been logged out.
+    """
+    request.session.clear()
+    
+    return {"message": "Logged out"}
 
 
-# Endpoint to get user info from the session
-@router.get("/user")
+@router.get("/me")
 async def get_user_info(request: Request):
+    """API endpoint to retrieve user info from current session
+
+    Args:
+        request (Request): Request object contains information about the request and is used to access the request context, which is necessary for OAuth2 flow.
+
+    Returns:
+        _type_: A dictionary containing the user information.
+    """
     # Retrieve user info from the session
     user_info = request.session.get("user_info")
+    
     if not user_info:
         return {"error": "User not authenticated"}
     return {"user_info": user_info}
