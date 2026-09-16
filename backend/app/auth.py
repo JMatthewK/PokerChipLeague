@@ -1,16 +1,18 @@
-from flask import Flask, redirect, url_for, session
-from authlib.integrations.flask_client import OAuth
+# Contains the OAuth registration and JWT validation
+from authlib.integrations.starlette_client import OAuth
+from dotenv import load_dotenv
 import os
 
-app = Flask(__name__)
-app.secret_key = os.urandom(24)  # Use a secure random key in production
-oauth = OAuth(app)
+load_dotenv()
+
+oauth = OAuth()
 
 oauth.register(
-  name='oidc',
-  authority='https://cognito-idp.us-east-1.amazonaws.com/us-east-1_bLhaihn2p',
-  client_id='paqhnpmsrdodif3jfe5u1r5ul',
-  client_secret='<client secret>',
-  server_metadata_url='https://cognito-idp.us-east-1.amazonaws.com/us-east-1_bLhaihn2p/.well-known/openid-configuration',
-  client_kwargs={'scope': 'phone openid email'}
+    name="cognito",
+    client_id=os.getenv("COGNITO_CLIENT_ID"),
+    client_secret=os.getenv("COGNITO_CLIENT_SECRET"),
+    server_metadata_url=os.getenv("COGNITO_METADATA_URL"),
+    client_kwargs={
+        "scope": "openid email profile",
+    },
 )
