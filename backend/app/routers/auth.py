@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Request
+from fastapi.responses import RedirectResponse
 from auth import oauth
 import os
 from dotenv import load_dotenv
@@ -71,7 +72,13 @@ async def logout(request: Request):
     """
     request.session.clear()
     
-    return {"message": "Logged out"}
+    cognito_logout_url = (
+        f"https://{os.getenv('COGNITO_DOMAIN')}/logout"
+        f"?client_id={os.getenv('COGNITO_CLIENT_ID')}"
+        f"&logout_uri={os.getenv('COGNITO_LOGOUT_REDIRECT_URI')}"
+    )
+    
+    return RedirectResponse(url=cognito_logout_url)
 
 
 @router.get("/me")
