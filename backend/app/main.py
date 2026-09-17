@@ -4,10 +4,11 @@ from starlette.middleware.sessions import SessionMiddleware
 import os
 from dotenv import load_dotenv
 
+
 load_dotenv()  # Load environment variables from .env file
 
 # Import routers from app/routers
-from routers import auth, leagues
+from app.routers import auth, leagues
 
 
 
@@ -22,6 +23,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
 
 app.add_middleware(
     SessionMiddleware, 

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
-from auth import oauth
+from app.auth import oauth
 import os
 from dotenv import load_dotenv
 
