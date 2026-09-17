@@ -51,6 +51,9 @@ class User(Base):
         onupdate=func.now(),
     )
 
+    """
+    League relationships that haven't been integrated yet
+    
     owned_leagues: Mapped[list["League"]] = relationship(
         back_populates="owner",
     )
@@ -59,3 +62,4 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+    """
