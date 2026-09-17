@@ -1,6 +1,9 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Depends
 from fastapi.responses import RedirectResponse
-from auth import oauth
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.auth import oauth
+from app.dependencies.database import get_db
+from app.services.users import get_or_create_cognito_user
 import os
 from dotenv import load_dotenv
 
@@ -30,7 +33,9 @@ async def login(request: Request):
 
 # Callback endpoint to handle the response from Cognito after authentication
 @router.get("/callback", name="auth_callback")
-async def auth_callback(request: Request):
+async def auth_callback(
+    request: Request, 
+    db: AsyncSession = Depends(get_db)):
     """Handles Cognito OAuth callback requests
     
     After successful authentication, Cognito will redirect the user to this endpoint with an authorization code. This function exchanges the code for an access token and retrieves user information.
@@ -44,20 +49,33 @@ async def auth_callback(request: Request):
     
     print("Callback received, processing authentication...")
     
+    # Information from Cognito login response is stored in the session for later use
     token = await oauth.cognito.authorize_access_token(request)
     user_info = token["userinfo"]
-    request.session["user_info"] = {
+    
+    # If user_info doesn't exist raise a value error
+    if not user_info:
+        raise ValueError("Cognito response is missing user information")
+    
+    # Get or create the user in the database based on Cognito sub and email
+    user = await get_or_create_cognito_user(db=db, user_info=user_info)
+    
+    # Request a session using the user data
+    request.session["user"] = {
+        "id": str(user.id),
         "sub": user_info["sub"],
         "email": user_info["email"],
-        "username": user_info.get("cognito:username")
+        "username": user_info.get("username"),
+        "nickname": user_info.get("nickname")
     }
     print("Session: ")
     print(request.session)
+    
 
     # Here you would typically create a session or JWT for the user
     return {
         "message": "Login successful", 
-        "user_info": user_info
+        "user": request.session["user"]
         }
     
 @router.get("/logout")
@@ -92,8 +110,8 @@ async def get_user_info(request: Request):
         _type_: A dictionary containing the user information.
     """
     # Retrieve user info from the session
-    user_info = request.session.get("user_info")
+    user = request.session.get("user")
     
-    if not user_info:
+    if not user :
         return {"error": "User not authenticated"}
-    return {"user_info": user_info}
+    return {"user": user}

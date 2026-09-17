@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()  # Load environment variables from .env file
 
 # Import routers from app/routers
-from routers import auth
+from app.routers.auth import router as auth_router
 
 # Create FastAPI app instance
 app = FastAPI()
@@ -26,7 +26,7 @@ app.add_middleware(
     secret_key=os.getenv("SESSION_SECRET_KEY"))  
 
 # Include the authentication router
-app.include_router(auth.router)
+app.include_router(auth_router)
 
 @app.get("/")
 def root():
