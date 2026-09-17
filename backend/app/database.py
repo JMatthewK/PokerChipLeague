@@ -10,7 +10,7 @@ from sqlalchemy.orm import DeclarativeBase
 
 load_dotenv()
 
-# Retrieve the dtaabase URL from the environment variable
+# Retrieve the database URL from the environment variable
 database_url = os.getenv("DATABASE_URL")
 
 if not database_url:

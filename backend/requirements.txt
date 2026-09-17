@@ -3,5 +3,5 @@ uvicorn
 authlib 
 itsdangerous
 sqlalchemy
-psycopg[binary]
 alembic
+asyncpg
