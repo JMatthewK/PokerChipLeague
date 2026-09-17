@@ -7,7 +7,9 @@ from dotenv import load_dotenv
 load_dotenv()  # Load environment variables from .env file
 
 # Import routers from app/routers
-from routers import auth
+from routers import auth, leagues
+
+
 
 # Create FastAPI app instance
 app = FastAPI()
@@ -27,6 +29,9 @@ app.add_middleware(
 
 # Include the authentication router
 app.include_router(auth.router)
+
+# Include the leagues router
+app.include_router(leagues.router)
 
 @app.get("/")
 def root():
