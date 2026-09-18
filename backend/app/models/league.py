@@ -1,6 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 from typing import TYPE_CHECKING
+import uuid
 
 from sqlalchemy import (
     BigInteger,
@@ -66,6 +67,15 @@ class League(Base):
         DateTime(timezone=True),
         server_default=func.now(),
         onupdate=func.now(),
+        nullable=True,
+    )
+    archived_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    archived_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
         nullable=True,
     )
     owner: Mapped["User"] = relationship(
