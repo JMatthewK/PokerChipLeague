@@ -37,6 +37,7 @@ async def create_league(
 
     league = League(
         name=payload.name.strip(),
+        status="active",
         owner_user_id=current_user.id,
         starting_chip_balance=payload.starting_chip_balance,
     )

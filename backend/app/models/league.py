@@ -8,6 +8,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     String,
+    UniqueConstraint,
     func,
     text,
 )
@@ -22,6 +23,17 @@ if TYPE_CHECKING:
 
 class League(Base):
     __tablename__ = "leagues"
+    
+    __table_args__ = (
+        CheckConstraint(
+            "starting_chip_balance >= 0",
+            name="leagues_starting_chip_balance_nonnegative",
+        ),
+        CheckConstraint(
+            "status in ('active', 'archived')",
+            name="leagues_status_valid",
+        ),
+    )
 
     id: Mapped[UUID] = mapped_column(
         PostgreSQLUUID(as_uuid=True),
@@ -57,8 +69,8 @@ class League(Base):
         nullable=True,
     )
     owner: Mapped["User"] = relationship(
-    back_populates="owned_leagues",
-)
+        back_populates="owned_leagues",
+    )
 
     memberships: Mapped[list["LeagueMembership"]] = relationship(
         back_populates="league",
