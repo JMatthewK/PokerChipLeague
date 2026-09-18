@@ -1,12 +1,24 @@
 from datetime import datetime
 from uuid import UUID
+from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, func
+from sqlalchemy import (
+    BigInteger,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    String,
+    func,
+    text,
+)
 from sqlalchemy.dialects.postgresql import UUID as PostgreSQLUUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from database import Base
+from app.database import Base
 
+if TYPE_CHECKING:
+    from app.models.user import User  
+    from app.models.league_membership import LeagueMembership  
 
 class League(Base):
     __tablename__ = "leagues"
@@ -30,7 +42,7 @@ class League(Base):
         nullable=True,
     )
     starting_chip_balance: Mapped[int | None] = mapped_column(
-        Integer,
+        BigInteger,
         nullable=True,
     )
     created_at: Mapped[datetime] = mapped_column(
@@ -43,4 +55,12 @@ class League(Base):
         server_default=func.now(),
         onupdate=func.now(),
         nullable=True,
+    )
+    owner: Mapped["User"] = relationship(
+    back_populates="owned_leagues",
+)
+
+    memberships: Mapped[list["LeagueMembership"]] = relationship(
+        back_populates="league",
+        cascade="all, delete-orphan",
     )
