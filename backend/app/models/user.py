@@ -1,3 +1,4 @@
+from typing import TYPE_CHECKING
 import uuid
 from datetime import datetime
 
@@ -6,6 +7,10 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+if TYPE_CHECKING:
+    from app.models.league import League
+    from app.models.league_membership import LeagueMembership
 
 
 class User(Base):
@@ -51,9 +56,6 @@ class User(Base):
         onupdate=func.now(),
     )
 
-    """
-    League relationships that haven't been integrated yet
-    
     owned_leagues: Mapped[list["League"]] = relationship(
         back_populates="owner",
     )
@@ -62,4 +64,3 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
-    """
